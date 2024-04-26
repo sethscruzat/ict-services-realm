@@ -7,7 +7,6 @@ import com.example.ict_services_realm.models.user_remarks
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
-import io.realm.kotlin.log.RealmLog.add
 import io.realm.kotlin.mongodb.User
 import io.realm.kotlin.mongodb.exceptions.SyncException
 import io.realm.kotlin.mongodb.subscriptions
@@ -15,13 +14,10 @@ import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.mongodb.sync.SyncSession
 import io.realm.kotlin.mongodb.syncSession
 import io.realm.kotlin.notifications.ResultsChange
-import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 interface SyncRepository {
@@ -29,14 +25,11 @@ interface SyncRepository {
     /**
      * Returns a flow with the tasks for the current subscription.
      */
-    fun getTaskList(): Flow<ResultsChange<user>>
+    fun getTicketList(): Flow<ResultsChange<ticket>>
     fun getUser(): Flow<ResultsChange<user>>
+    fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>>
 
-
-    /**
-     * Update the `isComplete` flag for a specific [Item].
-     */
-    suspend fun toggleIsComplete(task: user)
+    suspend fun markAsDone(ticketID: Int)
 
     /**
      * Adds a task that belongs to the current user using the specified [taskSummary].
@@ -63,6 +56,7 @@ interface SyncRepository {
      * Whether the given [task] belongs to the current user logged in to the app.
      */
     fun isTaskMine(task: user): Boolean
+    suspend fun updateChanges()
 
     /**
      * Closes the realm instance held by this repository.
@@ -104,9 +98,8 @@ class RealmSyncRepository(
         }
     }
 
-    override fun getTaskList(): Flow<ResultsChange<user>> {
-        return realm.query<user>()
-            .sort(Pair("_id", Sort.ASCENDING))
+    override fun getTicketList(): Flow<ResultsChange<ticket>> {
+        return realm.query<ticket>("assignedTo=='${currentUser.id}' AND status =='In Progress'")
             .asFlow()
     }
 
@@ -114,11 +107,25 @@ class RealmSyncRepository(
         return realm.query<user>("user_id=='${currentUser.id}'").asFlow()
     }
 
-    override suspend fun toggleIsComplete(task: user) {
+    override fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>> {
+        return realm.query<ticket>("ticketID==$0", ticketID).asFlow()
+    }
+
+    override suspend fun markAsDone(ticketID: Int) {
         realm.write {
-            val latestVersion = findLatest(task)
+            val ticketToUpdate = query<ticket>(query="ticketID==$0",ticketID).first().find()
+            if(ticketToUpdate!=null){
+                ticketToUpdate.status = "Complete"
+                copyToRealm(ticketToUpdate)
+            }
         }
     }
+
+    override suspend fun updateChanges() {
+        realm.syncSession.downloadAllServerChanges()
+        realm.syncSession.uploadAllLocalChanges()
+    }
+
 
     override suspend fun addTask(taskSummary: String) {
         val task = user().apply {
@@ -147,27 +154,4 @@ class RealmSyncRepository(
     override fun isTaskMine(task: user): Boolean = task.user_id == currentUser.id
 
     override fun close() = realm.close()
-}
-
-/**
- * Mock repo for generating the Compose layout preview.
- */
-class MockRepository : SyncRepository {
-    override fun getTaskList(): Flow<ResultsChange<user>> = flowOf()
-    override fun getUser(): Flow<ResultsChange<user>> = flowOf()
-    override suspend fun toggleIsComplete(task: user) = Unit
-    override suspend fun addTask(taskSummary: String) = Unit
-    override suspend fun deleteTask(task: user) = Unit
-    override fun pauseSync() = Unit
-    override fun resumeSync() = Unit
-    override fun isTaskMine(task: user): Boolean = task.user_id == MOCK_OWNER_ID_MINE
-    override fun close() = Unit
-
-    companion object {
-        const val MOCK_OWNER_ID_MINE = "A"
-        const val MOCK_OWNER_ID_OTHER = "B"
-
-        fun getMockTask(index: Int): user = user().apply {
-        }
-    }
 }

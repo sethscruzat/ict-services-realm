@@ -35,6 +35,7 @@ class LandingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
+            repository.updateChanges()
             repository.getUser().collect{ event->
                 when(event){
                     is InitialResults ->{

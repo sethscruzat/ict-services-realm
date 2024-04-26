@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
+    implementation(libs.androidx.navigation.compose.v277)
+
     implementation("io.realm.kotlin:library-base:1.15.0")
     implementation("io.realm.kotlin:library-sync:1.15.0")
 }

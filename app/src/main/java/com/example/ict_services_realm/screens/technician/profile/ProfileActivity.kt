@@ -8,8 +8,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.rememberNavController
 import com.example.ict_services_realm.repository.RealmSyncRepository
 import com.example.ict_services_realm.screens.login.LoginActivity
+import com.example.ict_services_realm.screens.technician.ticketList.TicketListViewModel
 import com.example.ict_services_realm.ui.theme.IctservicesrealmTheme
 import kotlinx.coroutines.launch
 
@@ -35,11 +37,15 @@ class ProfileActivity: ComponentActivity() {
         TaskBarViewModel.factory(repository, this)
     }
 
+    private val ticketListViewModel: TicketListViewModel by viewModels {
+        TicketListViewModel.factory(repository, this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            profileViewModel.event.collect(){
+            profileViewModel.event.collect{
                 Log.i("Error", "Tried to modify or remove a task that doesn't belong to the current user.")
                 Toast.makeText(
                     this@ProfileActivity,
@@ -67,7 +73,12 @@ class ProfileActivity: ComponentActivity() {
 
         setContent {
             IctservicesrealmTheme {
-                ProfileScaffold(profileViewModel = profileViewModel, taskBarViewModel = taskBarViewModel)
+                val navController = rememberNavController()
+                TechNavGraph(navController = navController,
+                    repository = repository,
+                    profileViewModel = profileViewModel,
+                    taskBarViewModel = taskBarViewModel,
+                    ticketListViewModel = ticketListViewModel)
             }
         }
     }

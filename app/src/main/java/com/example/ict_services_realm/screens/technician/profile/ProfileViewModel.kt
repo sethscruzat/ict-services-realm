@@ -37,8 +37,7 @@ class ProfileViewModel(private val repository: SyncRepository) : ViewModel() {
                         is InitialResults ->{
                             userState.value = event.list[0]
                         }
-
-                        is UpdatedResults -> TODO()
+                        is UpdatedResults -> Unit
                     }
 
                 }
