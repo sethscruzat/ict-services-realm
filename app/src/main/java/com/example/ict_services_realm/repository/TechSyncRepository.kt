@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-interface SyncRepository {
+interface TechSyncRepository {
 
     /**
      * Returns a flow with the tasks for the current subscription.
@@ -52,10 +52,6 @@ interface SyncRepository {
      */
     fun resumeSync()
 
-    /**
-     * Whether the given [task] belongs to the current user logged in to the app.
-     */
-    fun isTaskMine(task: user): Boolean
     suspend fun updateChanges()
 
     /**
@@ -67,9 +63,9 @@ interface SyncRepository {
 /**
  * Repo implementation used in runtime.
  */
-class RealmSyncRepository(
+class RealmSyncRepositoryTech(
     onSyncError: (session: SyncSession, error: SyncException) -> Unit
-) : SyncRepository{
+) : TechSyncRepository{
 
     private val realm: Realm
     private val config: SyncConfiguration
@@ -81,7 +77,6 @@ class RealmSyncRepository(
             .initialSubscriptions { realm ->
                 add(realm.query<user>("user_id==$0", currentUser.id))
                 add(realm.query<ticket>("assignedTo==$0", currentUser.id))
-                add(realm.query<ticket>("issuedBy==$0", currentUser.id))
             }
             .errorHandler { session: SyncSession, error: SyncException ->
                 onSyncError.invoke(session, error)
@@ -150,8 +145,6 @@ class RealmSyncRepository(
     override fun resumeSync() {
         realm.syncSession.resume()
     }
-
-    override fun isTaskMine(task: user): Boolean = task.user_id == currentUser.id
 
     override fun close() = realm.close()
 }

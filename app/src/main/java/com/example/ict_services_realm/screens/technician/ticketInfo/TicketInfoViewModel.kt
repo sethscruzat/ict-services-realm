@@ -5,14 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ict_services_realm.models.ticket
-import com.example.ict_services_realm.repository.SyncRepository
+import com.example.ict_services_realm.repository.TechSyncRepository
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 
 
 class TicketInfoViewModel(
-    private val repository: SyncRepository, ticketID: Int
+    private val repository: TechSyncRepository, ticketID: Int
 ): ViewModel(){
 
     private val _ticketInfoState: MutableState<ticket?> = mutableStateOf(null)
@@ -36,6 +36,5 @@ class TicketInfoViewModel(
         viewModelScope.launch {
             repository.markAsDone(ticketID)
         }
-
     }
 }

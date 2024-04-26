@@ -9,13 +9,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.example.ict_services_realm.models.ticket
-import com.example.ict_services_realm.repository.SyncRepository
+import com.example.ict_services_realm.repository.TechSyncRepository
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 
 class TicketListViewModel(
-    private val repository: SyncRepository,
+    private val repository: TechSyncRepository,
     val ticketListState: SnapshotStateList<ticket> = mutableStateListOf()
 ): ViewModel(){
 
@@ -54,7 +54,7 @@ class TicketListViewModel(
 
     companion object {
         fun factory(
-            repository: SyncRepository,
+            repository: TechSyncRepository,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
         ): AbstractSavedStateViewModelFactory {

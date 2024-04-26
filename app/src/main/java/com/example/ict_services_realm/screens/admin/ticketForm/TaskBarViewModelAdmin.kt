@@ -1,4 +1,4 @@
-package com.example.ict_services_realm.screens.technician.profile
+package com.example.ict_services_realm.screens.admin.ticketForm
 
 import android.os.Bundle
 import androidx.compose.runtime.MutableState
@@ -9,7 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.example.ict_services_realm.repository.TechSyncRepository
+import com.example.ict_services_realm.repository.AdminSyncRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -20,7 +20,7 @@ sealed class TaskBarEvent {
     class Error(val message: String, val throwable: Throwable) : TaskBarEvent()
 }
 
-class TaskBarViewModel(private val repository: TechSyncRepository
+class TaskBarViewModelAdmin(private val repository: AdminSyncRepository
 ) : ViewModel() {
 
     private val _offlineMode: MutableState<Boolean> = mutableStateOf(false)
@@ -55,7 +55,7 @@ class TaskBarViewModel(private val repository: TechSyncRepository
 
     companion object {
         fun factory(
-            repository: TechSyncRepository,
+            repository: AdminSyncRepository,
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null
         ): AbstractSavedStateViewModelFactory {
@@ -65,7 +65,7 @@ class TaskBarViewModel(private val repository: TechSyncRepository
                     modelClass: Class<T>,
                     handle: SavedStateHandle
                 ): T {
-                    return TaskBarViewModel(repository) as T
+                    return TaskBarViewModelAdmin(repository) as T
                 }
             }
         }

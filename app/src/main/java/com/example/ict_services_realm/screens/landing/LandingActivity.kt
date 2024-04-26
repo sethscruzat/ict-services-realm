@@ -5,20 +5,17 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.ict_services_realm.repository.RealmSyncRepository
-import com.example.ict_services_realm.screens.login.LoginScaffold
-import com.example.ict_services_realm.screens.login.LoginViewModel
+import com.example.ict_services_realm.repository.RealmSyncRepositoryTech
+import com.example.ict_services_realm.screens.admin.ticketForm.FormActivity
 import com.example.ict_services_realm.screens.technician.profile.ProfileActivity
-import com.example.ict_services_realm.screens.technician.profile.ProfileViewModel
 import com.example.ict_services_realm.ui.theme.IctservicesrealmTheme
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 
 class LandingActivity : ComponentActivity() {
-    private val repository = RealmSyncRepository{ _, error ->
+    private val repository = RealmSyncRepositoryTech{ _, error ->
         // Sync errors come from a background thread so route the Toast through the UI thread
         lifecycleScope.launch {
             // Catch write permission errors and notify user. This is just a 2nd line of defense
@@ -42,7 +39,7 @@ class LandingActivity : ComponentActivity() {
                         val userRes = event.list
                         if(userRes[0].role=="admin"){
                             // TODO: ADMIN TICKET ACTIVITY
-                            //val intent = Intent(this@LoginActivity, LandingActivity::class.java)
+                            val intent = Intent(this@LandingActivity, FormActivity::class.java)
                             startActivity(intent)
                             finish()
                         }else if(userRes[0].role=="technician"){

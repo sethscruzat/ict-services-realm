@@ -9,14 +9,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
-import com.example.ict_services_realm.repository.RealmSyncRepository
+import com.example.ict_services_realm.repository.RealmSyncRepositoryTech
 import com.example.ict_services_realm.screens.login.LoginActivity
 import com.example.ict_services_realm.screens.technician.ticketList.TicketListViewModel
 import com.example.ict_services_realm.ui.theme.IctservicesrealmTheme
 import kotlinx.coroutines.launch
 
 class ProfileActivity: ComponentActivity() {
-    private val repository = RealmSyncRepository{ _, error ->
+    private val repository = RealmSyncRepositoryTech{ _, error ->
         // Sync errors come from a background thread so route the Toast through the UI thread
         lifecycleScope.launch {
             // Catch write permission errors and notify user. This is just a 2nd line of defense

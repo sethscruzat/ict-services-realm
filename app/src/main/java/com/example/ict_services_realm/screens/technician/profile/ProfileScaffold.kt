@@ -27,7 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.ict_services_realm.app
 import com.example.ict_services_realm.navigation.NavRoutes
-import com.example.ict_services_realm.repository.SyncRepository
+import com.example.ict_services_realm.repository.TechSyncRepository
 import com.example.ict_services_realm.screens.technician.TechnicianNavItem
 import com.example.ict_services_realm.screens.technician.ticketInfo.TicketInfoScaffold
 import com.example.ict_services_realm.screens.technician.ticketInfo.TicketInfoViewModel
@@ -87,11 +87,11 @@ fun ProfileScaffold(modifier: Modifier = Modifier, navController: NavHostControl
 
 @Composable
 fun TechNavGraph(modifier: Modifier = Modifier,
-                 repository: SyncRepository,
-             navController: NavHostController,
-             startDestination: String = NavRoutes.TechnicianProfile.screenroute,
-             profileViewModel: ProfileViewModel,
-             taskBarViewModel: TaskBarViewModel,
+                 repository: TechSyncRepository,
+                 navController: NavHostController,
+                 startDestination: String = NavRoutes.TechnicianProfile.screenroute,
+                 profileViewModel: ProfileViewModel,
+                 taskBarViewModel: TaskBarViewModel,
                  ticketListViewModel: TicketListViewModel)
 {
     NavHost(modifier = modifier,navController = navController, startDestination = startDestination) {
@@ -110,17 +110,6 @@ fun TechNavGraph(modifier: Modifier = Modifier,
                 TicketInfoScaffold(navController = navController, ticketInfo = ticketInfoViewModel)
             }
         }
-
-        // ADMIN ROUTES
-/*        composable(NavRoutes.AdminTicketsForm.screenroute) {
-
-        }
-        composable(NavRoutes.AdminTicketsList.screenroute) {
-
-        }
-        composable(NavRoutes.AdminRate.screenroute) {
-
-        }*/
     }
 }
 
