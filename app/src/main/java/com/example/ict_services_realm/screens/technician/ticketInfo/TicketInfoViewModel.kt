@@ -1,30 +1,44 @@
 package com.example.ict_services_realm.screens.technician.ticketInfo
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ict_services_realm.TAG
 import com.example.ict_services_realm.models.ticket
 import com.example.ict_services_realm.repository.TechSyncRepository
+import com.example.ict_services_realm.screens.admin.ticketForm.FormEvent
+import com.example.ict_services_realm.screens.login.EventSeverity
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedResults
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-
 class TicketInfoViewModel(
-    private val repository: TechSyncRepository, ticketID: Int
+    private val repository: TechSyncRepository,
+    ticketID: Int
 ): ViewModel(){
 
     private val _ticketInfoState: MutableState<ticket?> = mutableStateOf(null)
     val ticketInfoState: MutableState<ticket?>
         get() = _ticketInfoState
 
+
     init {
         viewModelScope.launch {
             repository.getTicketInfo(ticketID).collect{event ->
                 when(event){
                     is InitialResults ->{
-                        _ticketInfoState.value = event.list[0]
+                        event.runCatching {
+                            _ticketInfoState.value = this.list[0]
+                        }.onSuccess {
+                            Log.i("INFO", "Ticket loaded")
+                        }.onFailure {
+                            Log.i("Error", "Ticket failed to load")
+                        }
                     }
                     is UpdatedResults -> Unit
                 }
@@ -37,4 +51,5 @@ class TicketInfoViewModel(
             repository.markAsDone(ticketID)
         }
     }
+
 }

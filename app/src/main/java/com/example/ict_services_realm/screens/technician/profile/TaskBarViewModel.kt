@@ -44,6 +44,7 @@ class TaskBarViewModel(private val repository: TechSyncRepository
     fun logOut() {
         viewModelScope.launch {
             _toolbarEvent.emit(TaskBarEvent.LogOut)
+            repository.close()
         }
     }
 

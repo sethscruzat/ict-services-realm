@@ -2,19 +2,25 @@ package com.example.ict_services_realm.screens.technician.profile
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -94,22 +100,39 @@ fun TechNavGraph(modifier: Modifier = Modifier,
                  taskBarViewModel: TaskBarViewModel,
                  ticketListViewModel: TicketListViewModel)
 {
-    NavHost(modifier = modifier,navController = navController, startDestination = startDestination) {
-        // TECHNICIAN ROUTES
-        composable(NavRoutes.TechnicianProfile.screenroute) {
-            //TODO: PUT BACK COMPLETED TICKET LIST
-            ProfileScaffold(navController = navController, profileViewModel = profileViewModel, taskBarViewModel = taskBarViewModel)
-        }
-        composable(NavRoutes.TechnicianTickets.screenroute) {
-            TicketListScaffold(navController = navController, ticketListViewModel = ticketListViewModel, taskBarViewModel = taskBarViewModel)
-        }
-        composable("${NavRoutes.TechnicianTicketInfo.screenroute}/{ticketID}") { navBackStackEntry ->
-            val ticketID = navBackStackEntry.arguments?.getString("ticketID")
-            val ticketInfoViewModel = ticketID?.let { TicketInfoViewModel(repository, it.toInt()) }
-            if (ticketInfoViewModel != null) {
-                TicketInfoScaffold(navController = navController, ticketInfo = ticketInfoViewModel)
+    val scaffoldLoaded = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        scaffoldLoaded.value = true
+    }
+    if(scaffoldLoaded.value){
+        NavHost(modifier = modifier,navController = navController, startDestination = startDestination) {
+            // TECHNICIAN ROUTES
+            composable(NavRoutes.TechnicianProfile.screenroute) {
+                ProfileScaffold(navController = navController, profileViewModel = profileViewModel, taskBarViewModel = taskBarViewModel)
+                //TODO: PUT BACK COMPLETED TICKET LIST
+            }
+            composable(NavRoutes.TechnicianTickets.screenroute) {
+                TicketListScaffold(navController = navController, ticketListViewModel = ticketListViewModel, taskBarViewModel = taskBarViewModel)
+            }
+            composable("${NavRoutes.TechnicianTicketInfo.screenroute}/{ticketID}") { navBackStackEntry ->
+                val ticketID = navBackStackEntry.arguments?.getString("ticketID")
+                val ticketInfoViewModel = ticketID?.let { TicketInfoViewModel(repository, it.toInt()) }
+                if (ticketInfoViewModel != null) {
+                    TicketInfoScaffold(navController = navController, ticketInfo = ticketInfoViewModel)
+                }
             }
         }
+    } else{
+        LoadingIndicator()
+    }
+}
+@Composable
+fun LoadingIndicator() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 

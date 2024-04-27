@@ -1,4 +1,4 @@
-package com.example.ict_services_realm.screens.technician.ticketList
+package com.example.ict_services_realm.screens.admin.completedTickets
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
@@ -27,18 +27,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.ict_services_realm.app
-import com.example.ict_services_realm.screens.technician.profile.TaskBarEvent
-import com.example.ict_services_realm.screens.technician.profile.TaskBarViewModel
-import com.example.ict_services_realm.screens.technician.profile.TechBottomNavigation
+import com.example.ict_services_realm.screens.admin.ticketForm.AdminBottomNavigation
+import com.example.ict_services_realm.screens.admin.ticketForm.TaskBarEvent
+import com.example.ict_services_realm.screens.admin.ticketForm.TaskBarViewModelAdmin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-fun TicketListScaffold(modifier: Modifier = Modifier, navController: NavHostController, ticketListViewModel: TicketListViewModel, taskBarViewModel: TaskBarViewModel) {
+fun CompletedTicketScaffold(modifier: Modifier = Modifier, navController: NavHostController, completedTicketViewModel: CompletedTicketViewModel, taskBarViewModelAdmin: TaskBarViewModelAdmin) {
     Scaffold(
-        bottomBar = { TechBottomNavigation(navController = navController) },
+        bottomBar = { AdminBottomNavigation(navController = navController) },
         content = {
             Column(
                 modifier = Modifier
@@ -56,9 +56,9 @@ fun TicketListScaffold(modifier: Modifier = Modifier, navController: NavHostCont
                             runCatching {
                                 app.currentUser?.logOut()
                             }.onSuccess {
-                                taskBarViewModel.logOut()
+                                taskBarViewModelAdmin.logOut()
                             }.onFailure {
-                                taskBarViewModel.error(TaskBarEvent.Error("Log out failed", it))
+                                taskBarViewModelAdmin.error(TaskBarEvent.Error("Log out failed", it))
                             }
                         }
                     }
@@ -74,9 +74,9 @@ fun TicketListScaffold(modifier: Modifier = Modifier, navController: NavHostCont
                         .weight(1F)
                 )
                 {
-                    val taskList = ticketListViewModel.ticketListState
+                    val taskList = completedTicketViewModel.compTicketListState
                     items(taskList) {item ->
-                        item.ticketID?.let { it1 -> TicketListItem(
+                        item.ticketID?.let { it1 -> CompletedTicketItem(
                             navController = navController,
                             equipmentID = item.equipmentID,
                             ticketID = it1) }
@@ -90,8 +90,8 @@ fun TicketListScaffold(modifier: Modifier = Modifier, navController: NavHostCont
 
 
 @Composable
-fun TicketListItem(modifier: Modifier = Modifier, navController: NavHostController,
-                           equipmentID: String, ticketID: Int) {
+fun CompletedTicketItem(modifier: Modifier = Modifier, navController: NavHostController,
+                   equipmentID: String, ticketID: Int) {
     Row(modifier = modifier
         .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -100,7 +100,7 @@ fun TicketListItem(modifier: Modifier = Modifier, navController: NavHostControll
             .weight(1f)
             .padding(horizontal = 9.dp),text = equipmentID, fontSize = 18.sp)
         IconButton(onClick = {
-            navController.navigate("techTicketInfo/{ticketID}"
+            navController.navigate("adminRate/{ticketID}"
                 .replace(oldValue = "{ticketID}", newValue = ticketID.toString()))
         }) {
             Icon(Icons.AutoMirrored.Outlined.ArrowForwardIos, contentDescription = "Open", modifier = modifier.size(16.dp))

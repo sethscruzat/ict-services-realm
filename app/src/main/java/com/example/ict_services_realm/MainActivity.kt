@@ -14,6 +14,8 @@ inline fun <reified T> T.TAG(): String = T::class.java.simpleName
 /*
 *  Sets up the App and enables Realm-specific logging in debug mode.
 */
+
+// TODO: ADD THOSE "ARE YOU SURE" BOXES IN ADMIN FORM, ADMIN RATE AND TECH MARK AS DONE
 class MainActivity: Application() {
 
     override fun onCreate() {

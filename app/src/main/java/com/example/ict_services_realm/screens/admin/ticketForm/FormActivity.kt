@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.example.ict_services_realm.TAG
 import com.example.ict_services_realm.repository.RealmSyncRepositoryAdmin
+import com.example.ict_services_realm.screens.admin.completedTickets.CompletedTicketViewModel
 import com.example.ict_services_realm.screens.login.EventSeverity
 import com.example.ict_services_realm.screens.login.LoginActivity
 import com.example.ict_services_realm.ui.theme.IctservicesrealmTheme
@@ -40,6 +41,10 @@ class FormActivity: ComponentActivity() {
         FormViewModel.factory(repository, this)
     }
 
+    private val completedTicketViewModel: CompletedTicketViewModel by viewModels {
+        CompletedTicketViewModel.factory(repository,this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -48,6 +53,7 @@ class FormActivity: ComponentActivity() {
                 .collect { taskBarEvent ->
                     when (taskBarEvent) {
                         TaskBarEvent.LogOut -> {
+                            repository.close()
                             startActivity(Intent(this@FormActivity, LoginActivity::class.java))
                             finish()
                         }
@@ -70,10 +76,6 @@ class FormActivity: ComponentActivity() {
                 }
         }
 
-        lifecycleScope.launch {
-            formViewModel.getTechniciansList()
-        }
-
         setContent {
             IctservicesrealmTheme {
                 val navController = rememberNavController()
@@ -82,15 +84,10 @@ class FormActivity: ComponentActivity() {
                     navController = navController,
                     formViewModel = formViewModel,
                     taskBarViewModelAdmin = taskBarViewModelAdmin,
-                    techList = formViewModel.techList
+                    completedTicketViewModel = completedTicketViewModel,
                 )
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        repository.close()
     }
 
     private fun FormEvent.process() {

@@ -44,6 +44,7 @@ class TaskBarViewModelAdmin(private val repository: AdminSyncRepository
     fun logOut() {
         viewModelScope.launch {
             _toolbarEvent.emit(TaskBarEvent.LogOut)
+            repository.close()
         }
     }
 

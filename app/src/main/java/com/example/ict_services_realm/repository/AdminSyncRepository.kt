@@ -5,6 +5,7 @@ import com.example.ict_services_realm.models.ticket
 import com.example.ict_services_realm.models.user
 import com.example.ict_services_realm.models.user_remarks
 import io.realm.kotlin.Realm
+import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.User
@@ -24,40 +25,36 @@ import kotlin.time.Duration.Companion.seconds
 
 interface AdminSyncRepository {
 
-    /**
-     * Returns a flow with the tasks for the current subscription.
-     */
+    //gets list of technicians for dropdown menu in FormScaffold
     fun getTechList(): Flow<ResultsChange<user>>
+
+    // gets current user data
     fun getUser(): Flow<ResultsChange<user>>
 
-    suspend fun markAsDone(ticketID: Int)
+    // gets list of completed tickets
+    fun getCompletedTickets(): Flow<ResultsChange<ticket>>
 
-    /**
-     * Adds a task that belongs to the current user using the specified [taskSummary].
-     */
+    // gets specific ticket info
+    suspend fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>>
+
+    suspend fun addRemark(rating: user_remarks, techID: String)
+
+    // adds new ticket and assigns to technician
     suspend fun addTicket(ticket: ticket)
 
+    // deletes ticket
+    suspend fun deleteTicket(ticketID: Int)
 
-    /**
-     * Deletes a given task.
-     */
-    suspend fun deleteTask(task: user)
-
-    /**
-     * Pauses synchronization with MongoDB. This is used to emulate a scenario of no connectivity.
-     */
+    //pauses realm device sync
     fun pauseSync()
 
-    /**
-     * Resumes synchronization with MongoDB.
-     */
+    // resumes realm device sync
     fun resumeSync()
 
+    // updates the realm db to be synced up with the mongodb incase transactions happen outside the app
     suspend fun updateChanges()
 
-    /**
-     * Closes the realm instance held by this repository.
-     */
+    //closes the current realm instance
     fun close()
 }
 
@@ -104,14 +101,29 @@ class RealmSyncRepositoryAdmin(
         return realm.query<user>("user_id=='${currentUser.id}'").asFlow()
     }
 
-    override suspend fun markAsDone(ticketID: Int) {
+    override fun getCompletedTickets(): Flow<ResultsChange<ticket>> {
+        return realm.query<ticket>("issuedBy=='${currentUser.id}' AND status='Complete'").asFlow()
+    }
+
+    override suspend fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>> {
+        return realm.query<ticket>("ticketID==$0", ticketID).asFlow()
+    }
+
+    override suspend fun addRemark(rating: user_remarks, techID: String) {
+        val techToRate = realm.query<user>("user_id=='${techID}'").first().find()
+        val newRemark = user_remarks().apply {
+            this.rating = rating.rating
+            this.ratedBy = rating.ratedBy
+            this.ticketID = rating.ticketID
+            this.comment = rating.comment
+        }
         realm.write {
-            val ticketToUpdate = query<ticket>(query="ticketID==$0",ticketID).first().find()
-            if(ticketToUpdate!=null){
-                ticketToUpdate.status = "Complete"
-                copyToRealm(ticketToUpdate)
+            if(techToRate!=null) {
+                val newestTech = findLatest(techToRate)
+                copyToRealm(newestTech!!, updatePolicy = UpdatePolicy.ALL).remarks.add(newRemark)
             }
         }
+        realm.subscriptions.waitForSynchronization(10.seconds)
     }
 
     override suspend fun updateChanges() {
@@ -134,11 +146,12 @@ class RealmSyncRepositoryAdmin(
                 ticket.location = ticket.location
             })
         }
+        realm.subscriptions.waitForSynchronization(10.seconds)
     }
 
-    override suspend fun deleteTask(task: user) {
+    override suspend fun deleteTicket(ticketID: Int) {
         realm.write {
-            delete(findLatest(task)!!)
+
         }
         realm.subscriptions.waitForSynchronization(10.seconds)
     }

@@ -21,42 +21,28 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 interface TechSyncRepository {
-
-    /**
-     * Returns a flow with the tasks for the current subscription.
-     */
+    // gets list of incomplete tickets
     fun getTicketList(): Flow<ResultsChange<ticket>>
-    fun getUser(): Flow<ResultsChange<user>>
-    fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>>
 
+    // gets user data
+    fun getUser(): Flow<ResultsChange<user>>
+
+    //gets specific ticket info
+    suspend fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>>
+
+    // marks tickets as done
     suspend fun markAsDone(ticketID: Int)
 
-    /**
-     * Adds a task that belongs to the current user using the specified [taskSummary].
-     */
-    suspend fun addTask(taskSummary: String)
-
-
-    /**
-     * Deletes a given task.
-     */
-    suspend fun deleteTask(task: user)
-
-    /**
-     * Pauses synchronization with MongoDB. This is used to emulate a scenario of no connectivity.
-     */
+    // pauses realm device sync
     fun pauseSync()
 
-    /**
-     * Resumes synchronization with MongoDB.
-     */
+    //resumes realm device sync
     fun resumeSync()
 
+    // updates the realm db to be synced up with the mongodb incase transactions happen outside the app
     suspend fun updateChanges()
 
-    /**
-     * Closes the realm instance held by this repository.
-     */
+    // closes the current realm instance
     fun close()
 }
 
@@ -102,7 +88,7 @@ class RealmSyncRepositoryTech(
         return realm.query<user>("user_id=='${currentUser.id}'").asFlow()
     }
 
-    override fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>> {
+    override suspend fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>> {
         return realm.query<ticket>("ticketID==$0", ticketID).asFlow()
     }
 
@@ -114,28 +100,12 @@ class RealmSyncRepositoryTech(
                 copyToRealm(ticketToUpdate)
             }
         }
+        realm.subscriptions.waitForSynchronization(10.seconds)
     }
 
     override suspend fun updateChanges() {
         realm.syncSession.downloadAllServerChanges()
         realm.syncSession.uploadAllLocalChanges()
-    }
-
-
-    override suspend fun addTask(taskSummary: String) {
-        val task = user().apply {
-
-        }
-        realm.write {
-            copyToRealm(task)
-        }
-    }
-
-    override suspend fun deleteTask(task: user) {
-        realm.write {
-            delete(findLatest(task)!!)
-        }
-        realm.subscriptions.waitForSynchronization(10.seconds)
     }
 
     override fun pauseSync() {

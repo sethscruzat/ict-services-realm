@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
 import com.example.ict_services_realm.repository.RealmSyncRepositoryTech
 import com.example.ict_services_realm.screens.admin.ticketForm.FormActivity
+import com.example.ict_services_realm.screens.technician.profile.LoadingIndicator
 import com.example.ict_services_realm.screens.technician.profile.ProfileActivity
 import com.example.ict_services_realm.ui.theme.IctservicesrealmTheme
 import io.realm.kotlin.notifications.InitialResults
@@ -30,7 +31,6 @@ class LandingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         lifecycleScope.launch {
             repository.updateChanges()
             repository.getUser().collect{ event->
@@ -41,14 +41,15 @@ class LandingActivity : ComponentActivity() {
                             // TODO: ADMIN TICKET ACTIVITY
                             val intent = Intent(this@LandingActivity, FormActivity::class.java)
                             startActivity(intent)
+                            repository.close()
                             finish()
                         }else if(userRes[0].role=="technician"){
                             // TODO: TECHNICIAN PROFILE ACTIVITY
                             val intent = Intent(this@LandingActivity, ProfileActivity::class.java)
                             startActivity(intent)
+                            repository.close()
                             finish()
                         }
-
                     }
                     is UpdatedResults -> TODO()
                 }
@@ -57,14 +58,8 @@ class LandingActivity : ComponentActivity() {
 
         setContent {
             IctservicesrealmTheme {
-                LandingScaffold()
+                LoadingIndicator()
             }
         }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        repository.close()
-    }
-
 }

@@ -9,12 +9,15 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.example.ict_services_realm.models.ticket
 import com.example.ict_services_realm.models.user
 import com.example.ict_services_realm.repository.AdminSyncRepository
 import com.example.ict_services_realm.screens.login.EventSeverity
 import io.realm.kotlin.mongodb.exceptions.ConnectionException
+import io.realm.kotlin.notifications.InitialResults
+import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -67,6 +70,39 @@ class FormViewModel(private val repository: AdminSyncRepository,
         _state.value = state.value.copy(assignedTo = assignedTo)
     }
 
+    init{
+        viewModelScope.launch {
+            repository.getTechList().collect{event ->
+                when(event){
+                    is InitialResults ->{
+                        techList.clear()
+                        techList.addAll(event.list)
+                    }
+                    is UpdatedResults -> {
+                        if (event.deletions.isNotEmpty() && techList.isNotEmpty()) {
+                            event.deletions.reversed().forEach {
+                                techList.removeAt(it)
+                            }
+                        }
+                        if (event.insertions.isNotEmpty()) {
+                            event.insertions.forEach {
+                                techList.add(it, event.list[it])
+                            }
+                        }
+                        if (event.changes.isNotEmpty()) {
+                            event.changes.forEach {
+                                techList.removeAt(it)
+                                techList.add(it, event.list[it])
+                            }
+                        }
+                    }
+                    else -> Unit
+                }
+
+            }
+        }
+    }
+
     fun addTicket(ticket: ticket){
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
@@ -74,25 +110,6 @@ class FormViewModel(private val repository: AdminSyncRepository,
             }.onSuccess {
                 _event.emit(FormEvent.ShowToast(EventSeverity.INFO, "Ticket Added"))
                 _event.emit(FormEvent.ShowMessage(EventSeverity.INFO, "Ticket Successfully created."))
-            }.onFailure { ex: Throwable ->
-                val message = when (ex) {
-                    is InvalidObjectException -> "Form details Invalid."
-                    is ConnectionException -> "Could not connect to the authentication provider. Check your internet connection and try again."
-                    else -> "Error: $ex"
-                }
-                _event.emit(FormEvent.ShowMessage(EventSeverity.ERROR, message))
-            }
-        }
-    }
-
-    fun getTechniciansList(){
-        CoroutineScope(Dispatchers.IO).launch {
-            runCatching {
-                repository.getTechList()
-            }.onSuccess {
-                it.collect{event->
-                    techList.addAll(event.list)
-                }
             }.onFailure { ex: Throwable ->
                 val message = when (ex) {
                     is InvalidObjectException -> "Form details Invalid."
