@@ -31,6 +31,9 @@ interface AdminSyncRepository {
     // gets current user data
     fun getUser(): Flow<ResultsChange<user>>
 
+    //get name of technician for rate screen
+    fun getTechName(userId: String): Flow<ResultsChange<user>>
+
     // gets list of completed tickets
     fun getCompletedTickets(): Flow<ResultsChange<ticket>>
 
@@ -99,6 +102,10 @@ class RealmSyncRepositoryAdmin(
 
     override fun getUser(): Flow<ResultsChange<user>> {
         return realm.query<user>("user_id=='${currentUser.id}'").asFlow()
+    }
+
+    override fun getTechName(userId: String): Flow<ResultsChange<user>> {
+        return realm.query<user>("user_id=='${userId}'").asFlow()
     }
 
     override fun getCompletedTickets(): Flow<ResultsChange<ticket>> {

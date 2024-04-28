@@ -41,14 +41,14 @@ fun TicketInfoScaffold(modifier: Modifier = Modifier,
             ) { Text("Back") }
             Spacer(modifier = Modifier.weight(0.1f))
             Column(modifier = modifier.weight(2f)){
-                Text(text = ticketInfoState.equipmentID, modifier = modifier
+                Text(text = "(PLACEHOLDER): ${ticketInfoState.equipmentID}", modifier = modifier
                     .padding(
                         vertical = 6.dp,
                         horizontal = 10.dp
                     ),
                     fontSize = 17.sp)
                 ticketInfoState.location?.let {
-                    Text(text = it, modifier = modifier
+                    Text(text = "Location: $it", modifier = modifier
                         .padding(
                             vertical = 6.dp,
                             horizontal = 10.dp
@@ -56,7 +56,7 @@ fun TicketInfoScaffold(modifier: Modifier = Modifier,
                         fontSize = 17.sp)
                 }
                 ticketInfoState.remarks?.let {
-                    Text(text = it, modifier = modifier
+                    Text(text = "Condition: $it", modifier = modifier
                         .padding(
                             vertical = 6.dp,
                             horizontal = 10.dp
@@ -69,19 +69,21 @@ fun TicketInfoScaffold(modifier: Modifier = Modifier,
                         horizontal = 10.dp
                     ),
                     fontSize = 17.sp)*/
-                Button(
-                    modifier = modifier
-                        .padding(12.dp)
-                        .align(Alignment.End),
-                    onClick = {
-                        ticketInfoState.ticketID?.let { ticketInfo.markTicketAsDone(it) }
-                        Toast.makeText(ctx, "Ticket marked as Done", Toast.LENGTH_SHORT).show()
-                        navController.navigateUp()
-                        /* TODO: 1) IMPLEMENT NOTIFY*/
+                if(ticketInfoState.status == "In Progress"){
+                    Button(
+                        modifier = modifier
+                            .padding(12.dp)
+                            .align(Alignment.End),
+                        onClick = {
+                            ticketInfoState.ticketID?.let { ticketInfo.markTicketAsDone(it) }
+                            Toast.makeText(ctx, "Ticket marked as Done", Toast.LENGTH_SHORT).show()
+                            navController.navigateUp()
+                            /* TODO: 1) IMPLEMENT NOTIFY*/
+                        }
+                    )
+                    {
+                        Text("Mark As Done")
                     }
-                )
-                {
-                    Text("Mark As Done")
                 }
             }
         }

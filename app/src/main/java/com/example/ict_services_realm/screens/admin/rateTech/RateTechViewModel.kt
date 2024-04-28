@@ -39,6 +39,10 @@ class RateTechViewModel(
     val ticketInfoState: MutableState<ticket?>
         get() = _ticketInfoState
 
+    private val _techName: MutableState<String> = mutableStateOf("")
+    val techName: MutableState<String>
+        get() = _techName
+
     private val _state: MutableState<RemarkState> = mutableStateOf(RemarkState.initialState)
     val state: State<RemarkState>
         get() = _state
@@ -72,6 +76,14 @@ class RateTechViewModel(
         }
     }
 
+    fun getTechName(techID: String){
+        viewModelScope.launch {
+            repository.getTechName(techID).collect{
+                techName.value = "${it.list[0].firstName} ${it.list[0].lastName}"
+            }
+        }
+    }
+
     fun addRating(userRemarks: user_remarks, techID: String){
         CoroutineScope(Dispatchers.IO).launch {
             runCatching {
@@ -90,11 +102,11 @@ class RateTechViewModel(
     }
 
     fun validateRemarkForm(userRemarks: user_remarks): FormValidationResult {
-        if(userRemarks.comment!!.isBlank()){
-            return FormValidationResult.Invalid("No comments inputted!")
-        }
         if(userRemarks.rating!!.equals(0.0)){
             return FormValidationResult.Invalid("Rating should be at least 1.0!")
+        }
+        if(userRemarks.comment!!.isBlank()){
+            return FormValidationResult.Invalid("No comments inputted!")
         }
         return FormValidationResult.Valid
     }

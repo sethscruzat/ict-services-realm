@@ -24,8 +24,12 @@ interface TechSyncRepository {
     // gets list of incomplete tickets
     fun getTicketList(): Flow<ResultsChange<ticket>>
 
+    // gets list of complete tickets
+    fun getCompTicketList(): Flow<ResultsChange<ticket>>
+
     // gets user data
     fun getUser(): Flow<ResultsChange<user>>
+    fun getAdminName(userId: String): Flow<ResultsChange<user>>
 
     //gets specific ticket info
     suspend fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>>
@@ -63,6 +67,7 @@ class RealmSyncRepositoryTech(
             .initialSubscriptions { realm ->
                 add(realm.query<user>("user_id==$0", currentUser.id))
                 add(realm.query<ticket>("assignedTo==$0", currentUser.id))
+                //add(realm.query<ticket>("role==$0", "admin"))
             }
             .errorHandler { session: SyncSession, error: SyncException ->
                 onSyncError.invoke(session, error)
@@ -84,8 +89,17 @@ class RealmSyncRepositoryTech(
             .asFlow()
     }
 
+    override fun getCompTicketList(): Flow<ResultsChange<ticket>> {
+        return realm.query<ticket>("assignedTo=='${currentUser.id}' AND status =='Complete'")
+            .asFlow()
+    }
+
     override fun getUser(): Flow<ResultsChange<user>> {
         return realm.query<user>("user_id=='${currentUser.id}'").asFlow()
+    }
+
+    override fun getAdminName(userId: String): Flow<ResultsChange<user>> {
+        return realm.query<user>("user_id=='${userId}'").asFlow()
     }
 
     override suspend fun getTicketInfo(ticketID: Int): Flow<ResultsChange<ticket>> {

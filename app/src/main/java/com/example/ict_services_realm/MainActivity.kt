@@ -16,6 +16,8 @@ inline fun <reified T> T.TAG(): String = T::class.java.simpleName
 */
 
 // TODO: ADD THOSE "ARE YOU SURE" BOXES IN ADMIN FORM, ADMIN RATE AND TECH MARK AS DONE
+//       INTEGRATE EQUIPMENT COLLECTION ONCE MAY GO SIGNAL -> Add Equipment details into tickets
+//       PUT CONFIDENTIAL INFO (realm appID, etc) INTO SEPARATE .XML (res -> values folder)
 class MainActivity: Application() {
 
     override fun onCreate() {

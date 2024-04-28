@@ -2,6 +2,7 @@ package com.example.ict_services_realm.screens.admin.rateTech
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,11 +48,16 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                 navController.navigateUp()
             }
         ) { Text("Back") }
-        Spacer(modifier = Modifier.weight(0.5f))
-        Column(modifier = modifier.weight(3f)){
+        Spacer(modifier = modifier.weight(1f))
+        Column(modifier = modifier
+            .padding(16.dp)
+            .weight(90f)
+            .align(Alignment.CenterHorizontally)
+        )
+        {
             rateTechViewModel.ticketInfoState.value?.equipmentID?.let {
                 Text(
-                    text = it, modifier = modifier
+                    text = "(PLACEHOLDER): $it", modifier = modifier
                         .padding(
                             vertical = 6.dp,
                             horizontal = 10.dp
@@ -61,7 +67,7 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
             }
             rateTechViewModel.ticketInfoState.value?.location?.let {
                 Text(
-                    text = it, modifier = modifier
+                    text = "Location: $it", modifier = modifier
                         .padding(
                             vertical = 6.dp,
                             horizontal = 10.dp
@@ -69,9 +75,10 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                     fontSize = 17.sp
                 )
             }
+            // Might replace this
             rateTechViewModel.ticketInfoState.value?.remarks?.let {
                 Text(
-                    text = it, modifier = modifier
+                    text = "Condition: $it", modifier = modifier
                         .padding(
                             vertical = 6.dp,
                             horizontal = 10.dp
@@ -79,24 +86,25 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                     fontSize = 17.sp
                 )
             }
-/*            rateTechViewModel.ticketInfoState.value?.assignedTo?.let {
+            rateTechViewModel.ticketInfoState.value?.assignedTo?.let {
+                rateTechViewModel.getTechName(it)
                 Text(
-                    text = it, modifier = modifier
+                    text = "Issued To: ${rateTechViewModel.techName.value}", modifier = modifier
                         .padding(
                             vertical = 6.dp,
                             horizontal = 10.dp
                         ),
                     fontSize = 17.sp
                 )
-            }*/
+            }
             Divider(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(
-                        start = 12.dp,
+                        start = 6.dp,
                         top = 24.dp,
-                        end = 12.dp,
-                        bottom = 12.dp
+                        end = 6.dp,
+                        bottom = 32.dp
                     ),
                 thickness = 3.dp
             )
@@ -115,7 +123,7 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                 maxLines = 5,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 6.dp)
+                    .padding(top = 24.dp, end = 16.dp, bottom = 6.dp)
             )
             Button(
                 modifier = modifier

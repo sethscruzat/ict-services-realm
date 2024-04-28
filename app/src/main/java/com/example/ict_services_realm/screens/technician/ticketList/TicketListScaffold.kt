@@ -74,8 +74,8 @@ fun TicketListScaffold(modifier: Modifier = Modifier, navController: NavHostCont
                         .weight(1F)
                 )
                 {
-                    val taskList = ticketListViewModel.ticketListState
-                    items(taskList) {item ->
+                    val ticketList = ticketListViewModel.ticketListState
+                    items(ticketList) {item ->
                         item.ticketID?.let { it1 -> TicketListItem(
                             navController = navController,
                             equipmentID = item.equipmentID,
@@ -93,12 +93,11 @@ fun TicketListScaffold(modifier: Modifier = Modifier, navController: NavHostCont
 fun TicketListItem(modifier: Modifier = Modifier, navController: NavHostController,
                            equipmentID: String, ticketID: Int) {
     Row(modifier = modifier
-        .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        .fillMaxWidth()
     ) {
         Text(modifier = modifier
             .weight(1f)
-            .padding(horizontal = 9.dp),text = equipmentID, fontSize = 18.sp)
+            .padding(horizontal = 9.dp, vertical = 12.dp),text = equipmentID, fontSize = 18.sp)
         IconButton(onClick = {
             navController.navigate("techTicketInfo/{ticketID}"
                 .replace(oldValue = "{ticketID}", newValue = ticketID.toString()))
