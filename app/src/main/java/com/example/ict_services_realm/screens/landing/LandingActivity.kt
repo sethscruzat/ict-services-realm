@@ -38,20 +38,18 @@ class LandingActivity : ComponentActivity() {
                     is InitialResults ->{
                         val userRes = event.list
                         if(userRes[0].role=="admin"){
-                            // TODO: ADMIN TICKET ACTIVITY
                             val intent = Intent(this@LandingActivity, FormActivity::class.java)
                             startActivity(intent)
                             repository.close()
                             finish()
                         }else if(userRes[0].role=="technician"){
-                            // TODO: TECHNICIAN PROFILE ACTIVITY
                             val intent = Intent(this@LandingActivity, ProfileActivity::class.java)
                             startActivity(intent)
                             repository.close()
                             finish()
                         }
                     }
-                    is UpdatedResults -> TODO()
+                    is UpdatedResults -> Unit
                 }
             }
         }

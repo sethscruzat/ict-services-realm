@@ -2,6 +2,7 @@ package com.example.ict_services_realm.screens.admin.ticketForm
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -48,6 +50,7 @@ import com.example.ict_services_realm.screens.admin.completedTickets.CompletedTi
 import com.example.ict_services_realm.screens.admin.completedTickets.CompletedTicketViewModel
 import com.example.ict_services_realm.screens.admin.rateTech.RateTechScaffold
 import com.example.ict_services_realm.screens.admin.rateTech.RateTechViewModel
+import com.example.ict_services_realm.screens.admin.rateTech.RateTechViewModelFactory
 import com.example.ict_services_realm.screens.technician.AdminNavItem
 import com.example.ict_services_realm.screens.technician.profile.LoadingIndicator
 import com.example.ict_services_realm.ui.theme.Purple80
@@ -60,6 +63,7 @@ private const val USABLE_WIDTH = 0.8F
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FormScaffold(modifier: Modifier = Modifier, navController: NavHostController ,formViewModel: FormViewModel, taskBarViewModelAdmin: TaskBarViewModelAdmin){
+    val showConfirmDialog = remember { mutableStateOf(false)}
     Scaffold(
         bottomBar = { AdminBottomNavigation(navController = navController)},
         content = {
@@ -194,12 +198,39 @@ fun FormScaffold(modifier: Modifier = Modifier, navController: NavHostController
                         }) {
                         Text("Submit")
                     }
+
+                    // WAG MUNA GALAWIN.
+/*                    if(showConfirmDialog.value){
+                        AlertDialog(
+                            onDismissRequest = { showConfirmDialog.value = false },
+                            confirmButton = {
+                                Button(onClick = {
+                                    formViewModel.setEquipmentID("")
+                                    formViewModel.setRemarks("")
+                                    formViewModel.setLocation("")
+                                    formViewModel.setAssignedTo("")
+                                    assignedToName = ""
+                                    showConfirmDialog.value = false
+                                }) {
+                                    Text(text = "Confirm")
+                                }
+                            },
+                            dismissButton = {
+                                Button(onClick = {
+                                    showConfirmDialog.value = false
+                                }) {
+                                    Text(text = "Dismiss")
+                                }
+                                            },
+                            title = { Text(text = "Confirmation")},
+                            text = { Text(text = "Do you want to submit this ticket?")}
+                        )
+                    }*/
                 }
             }
         }
     )
 }
-
 
 @Composable
 fun AdminNavGraph(
@@ -234,14 +265,14 @@ fun AdminNavGraph(
                 )
             }
             composable("${NavRoutes.AdminRate.screenroute}/{ticketID}") {navBackStackEntry ->
-                val ticketID = navBackStackEntry.arguments?.getString("ticketID")
-                val rateTechViewModel = ticketID?.toInt()?.let { RateTechViewModel(repository, it) }
-                if(rateTechViewModel!=null){
-                    RateTechScaffold(
-                        navController = navController,
-                        rateTechViewModel = rateTechViewModel
-                    )
-                }
+                val ticketID = navBackStackEntry.arguments?.getString("ticketID")!!.toInt()
+                val rateTechViewModel: RateTechViewModel = viewModel(
+                    factory = RateTechViewModelFactory(repository, ticketID)
+                )
+                RateTechScaffold(
+                    navController = navController,
+                    rateTechViewModel = rateTechViewModel
+                )
             }
         }
     }else{

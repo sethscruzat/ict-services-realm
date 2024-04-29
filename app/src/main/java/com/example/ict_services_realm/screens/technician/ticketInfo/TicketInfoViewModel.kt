@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.ict_services_realm.models.ticket
 import com.example.ict_services_realm.repository.TechSyncRepository
+import com.example.ict_services_realm.screens.admin.rateTech.RateTechViewModel
 import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
@@ -45,5 +47,17 @@ class TicketInfoViewModel(
             repository.markAsDone(ticketID)
         }
     }
+}
 
+class TicketInfoViewModelFactory(
+    private val repository: TechSyncRepository,
+    private val ticketId: Int
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(TicketInfoViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return TicketInfoViewModel(repository, ticketId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

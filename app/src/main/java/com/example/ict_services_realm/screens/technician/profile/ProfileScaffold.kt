@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -56,6 +56,7 @@ import com.example.ict_services_realm.repository.TechSyncRepository
 import com.example.ict_services_realm.screens.technician.TechnicianNavItem
 import com.example.ict_services_realm.screens.technician.ticketInfo.TicketInfoScaffold
 import com.example.ict_services_realm.screens.technician.ticketInfo.TicketInfoViewModel
+import com.example.ict_services_realm.screens.technician.ticketInfo.TicketInfoViewModelFactory
 import com.example.ict_services_realm.screens.technician.ticketList.TicketListItem
 import com.example.ict_services_realm.screens.technician.ticketList.TicketListScaffold
 import com.example.ict_services_realm.screens.technician.ticketList.TicketListViewModel
@@ -139,6 +140,7 @@ fun ProfileScaffold(modifier: Modifier = Modifier, navController: NavHostControl
                 }
 
                 // remarks box
+               // TODO: PAAYOS RIN NITO, may nakatago sa likod ng bottom nav bar
                val remarksList = profileViewModel.userState.value?.remarks?.toList()
                LazyColumn(
                    state = rememberLazyListState(),
@@ -184,17 +186,16 @@ fun TechNavGraph(modifier: Modifier = Modifier,
             // TECHNICIAN ROUTES
             composable(NavRoutes.TechnicianProfile.screenroute) {
                 ProfileScaffold(navController = navController, profileViewModel = profileViewModel, taskBarViewModel = taskBarViewModel)
-                //TODO: PUT BACK COMPLETED TICKET LIST
             }
             composable(NavRoutes.TechnicianTickets.screenroute) {
                 TicketListScaffold(navController = navController, ticketListViewModel = ticketListViewModel, taskBarViewModel = taskBarViewModel)
             }
             composable("${NavRoutes.TechnicianTicketInfo.screenroute}/{ticketID}") { navBackStackEntry ->
-                val ticketID = navBackStackEntry.arguments?.getString("ticketID")
-                val ticketInfoViewModel = ticketID?.let { TicketInfoViewModel(repository, it.toInt()) }
-                if (ticketInfoViewModel != null) {
-                    TicketInfoScaffold(navController = navController, ticketInfo = ticketInfoViewModel)
-                }
+                val ticketID = navBackStackEntry.arguments?.getString("ticketID")!!.toInt()
+                val ticketInfoViewModel: TicketInfoViewModel = viewModel(
+                    factory = TicketInfoViewModelFactory(repository, ticketID)
+                )
+                TicketInfoScaffold(navController = navController, ticketInfo = ticketInfoViewModel)
             }
         }
     } else{

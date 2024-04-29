@@ -2,7 +2,6 @@ package com.example.ict_services_realm.screens.admin.rateTech
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +20,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +37,11 @@ import com.example.ict_services_realm.models.user_remarks
 
 @Composable
 fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostController, rateTechViewModel: RateTechViewModel){
+    var showConfirmDialog = remember { mutableStateOf(false) }
     val ctx = LocalContext.current
+    LaunchedEffect(Unit) {
+        rateTechViewModel.getTechName(rateTechViewModel.ticketInfoState.value!!.assignedTo)
+    }
     Column(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight())
@@ -86,17 +92,14 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                     fontSize = 17.sp
                 )
             }
-            rateTechViewModel.ticketInfoState.value?.assignedTo?.let {
-                rateTechViewModel.getTechName(it)
-                Text(
-                    text = "Issued To: ${rateTechViewModel.techName.value}", modifier = modifier
-                        .padding(
-                            vertical = 6.dp,
-                            horizontal = 10.dp
-                        ),
-                    fontSize = 17.sp
-                )
-            }
+            Text(
+                text = "Issued To: ${rateTechViewModel.techName.value}", modifier = modifier
+                    .padding(
+                        vertical = 6.dp,
+                        horizontal = 10.dp
+                    ),
+                fontSize = 17.sp
+            )
             Divider(
                 modifier = modifier
                     .fillMaxWidth()
@@ -145,7 +148,6 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                             Toast.makeText(ctx, validationResult.errorMessage, Toast.LENGTH_SHORT).show()
                         }
                     }
-
                     rateTechViewModel.setRating(0.0)
                     rateTechViewModel.setComment("")
                     /* TODO: 1) IMPLEMENT NOTIFY*/
@@ -154,6 +156,33 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
             {
                 Text("Rate Performance")
             }
+            // WAG MUNA GALAWIN.
+/*            if(showConfirmDialog.value){
+                AlertDialog(onDismissRequest = { showConfirmDialog.value = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            rateTechViewModel.addRating(
+                                userRemarks = remark,
+                                techID = rateTechViewModel.ticketInfoState.value!!.assignedTo,
+                            )
+                            rateTechViewModel.setRating(0.0)
+                            rateTechViewModel.setComment("")
+                            showConfirmDialog.value = false
+                        }) {
+                          Text(text = "Confirm")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {
+                            showConfirmDialog.value = false
+                        }) {
+                            Text(text = "Dismiss")
+                        }},
+                    title = { Text(text = "Confirmation")},
+                    text = { Text(text = "Do you want to submit this review?")}
+                )
+            }*/
+
         }
     }
 }

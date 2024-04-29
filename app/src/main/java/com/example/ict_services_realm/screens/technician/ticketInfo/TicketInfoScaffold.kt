@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +29,7 @@ fun TicketInfoScaffold(modifier: Modifier = Modifier,
 {
     val ticketInfoState = ticketInfo.ticketInfoState.value
     val ctx = LocalContext.current
+    var showConfirmDialog = remember { mutableStateOf(false)}
     if(ticketInfoState!= null){
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -69,15 +73,14 @@ fun TicketInfoScaffold(modifier: Modifier = Modifier,
                         horizontal = 10.dp
                     ),
                     fontSize = 17.sp)*/
+
                 if(ticketInfoState.status == "In Progress"){
                     Button(
                         modifier = modifier
                             .padding(12.dp)
                             .align(Alignment.End),
                         onClick = {
-                            ticketInfoState.ticketID?.let { ticketInfo.markTicketAsDone(it) }
-                            Toast.makeText(ctx, "Ticket marked as Done", Toast.LENGTH_SHORT).show()
-                            navController.navigateUp()
+                            showConfirmDialog.value = true
                             /* TODO: 1) IMPLEMENT NOTIFY*/
                         }
                     )
@@ -85,6 +88,32 @@ fun TicketInfoScaffold(modifier: Modifier = Modifier,
                         Text("Mark As Done")
                     }
                 }
+            }
+            if(showConfirmDialog.value){
+                AlertDialog(
+                    onDismissRequest = { showConfirmDialog.value = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            ticketInfoState.ticketID?.let { ticketInfo.markTicketAsDone(it) }
+                            showConfirmDialog.value = false
+                            Toast.makeText(ctx, "Ticket marked as Done", Toast.LENGTH_SHORT).show()
+                            navController.navigateUp()
+                        }) {
+                            Text(text = "Confirm")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = {
+                            showConfirmDialog.value = false
+                        }) {
+                            Text(text = "Dismiss")
+                        }
+                    },
+                    title = { Text(text = "Confirmation")},
+                    text = { Text(text = "Do you want to mark the task as done?")},
+/*                    containerColor = Color.LightGray,
+                    modifier = modifier.border(BorderStroke(4.dp, Color.Black), RectangleShape)*/
+                )
             }
         }
     }else{

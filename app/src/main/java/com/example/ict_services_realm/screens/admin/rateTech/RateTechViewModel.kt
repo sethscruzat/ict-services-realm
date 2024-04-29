@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.ict_services_realm.models.ticket
 import com.example.ict_services_realm.models.user_remarks
@@ -32,7 +33,8 @@ data class RemarkState(
 }
 
 class RateTechViewModel(
-    private val repository: AdminSyncRepository, ticketID: Int
+    private val repository: AdminSyncRepository,
+    ticketID: Int
 ): ViewModel(){
 
     private val _ticketInfoState: MutableState<ticket?> = mutableStateOf(null)
@@ -115,5 +117,17 @@ class RateTechViewModel(
         data object Valid : FormValidationResult()
         data class Invalid(val errorMessage: String) : FormValidationResult()
     }
+}
 
+class RateTechViewModelFactory(
+    private val repository: AdminSyncRepository,
+    private val ticketId: Int
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RateTechViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RateTechViewModel(repository, ticketId) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }
