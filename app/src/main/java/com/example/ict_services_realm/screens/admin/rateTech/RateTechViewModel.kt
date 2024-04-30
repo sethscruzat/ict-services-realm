@@ -103,11 +103,11 @@ class RateTechViewModel(
         }
     }
 
-    fun validateRemarkForm(userRemarks: user_remarks): FormValidationResult {
-        if(userRemarks.rating!!.equals(0.0)){
+    fun validateRemarkForm(rating: Double, comment: String): FormValidationResult {
+        if(rating.equals(0.0)){
             return FormValidationResult.Invalid("Rating should be at least 1.0!")
         }
-        if(userRemarks.comment!!.isBlank()){
+        if(comment.isBlank()){
             return FormValidationResult.Invalid("No comments inputted!")
         }
         return FormValidationResult.Valid

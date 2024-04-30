@@ -121,11 +121,11 @@ class FormViewModel(private val repository: AdminSyncRepository,
         }
     }
 
-    fun validateTicketForm(ticket: ticket): FormValidationResult{
-        if(ticket.equipmentID.isBlank()){
+    fun validateTicketForm(equipmentID: String, location: String): FormValidationResult{
+        if(equipmentID.isBlank()){
             return FormValidationResult.Invalid("No ID for equipment Inputted!")
         }
-        if(ticket.location!!.isBlank()){
+        if(location.isBlank()){
             return FormValidationResult.Invalid("Location cannot be empty")
         }
         return FormValidationResult.Valid

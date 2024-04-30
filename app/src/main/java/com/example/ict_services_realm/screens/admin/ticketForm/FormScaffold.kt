@@ -2,7 +2,6 @@ package com.example.ict_services_realm.screens.admin.ticketForm
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -178,33 +178,33 @@ fun FormScaffold(modifier: Modifier = Modifier, navController: NavHostController
                         colors = ButtonDefaults.buttonColors(containerColor = Purple80),
                         modifier = Modifier.fillMaxWidth(USABLE_WIDTH),
                         onClick = {
-                            val ticketToAdd = ticket()
-                            ticketToAdd.assignedTo = formViewModel.state.value.assignedTo
-                            ticketToAdd.equipmentID = formViewModel.state.value.equipmentID
-                            ticketToAdd.remarks = formViewModel.state.value.remarks
-                            ticketToAdd.location = formViewModel.state.value.location
-                            ticketToAdd.issuedBy = app.currentUser?.id.toString()
-                            when(val validationResult = formViewModel.validateTicketForm(ticketToAdd)){
-                                is FormViewModel.FormValidationResult.Valid -> formViewModel.addTicket(ticketToAdd)
+                            val equipmentID = formViewModel.state.value.equipmentID
+                            val location = formViewModel.state.value.location
+                            when(val validationResult = formViewModel.validateTicketForm(equipmentID, location)){
+                                is FormViewModel.FormValidationResult.Valid -> showConfirmDialog.value = true
                                 is FormViewModel.FormValidationResult.Invalid -> {
                                     Toast.makeText(ctx, validationResult.errorMessage, Toast.LENGTH_SHORT).show()
                                 }
                             }
-                            formViewModel.setEquipmentID("")
-                            formViewModel.setRemarks("")
-                            formViewModel.setLocation("")
-                            formViewModel.setAssignedTo("")
-                            assignedToName = ""
                         }) {
                         Text("Submit")
                     }
 
-                    // WAG MUNA GALAWIN.
-/*                    if(showConfirmDialog.value){
+                    if(showConfirmDialog.value){
                         AlertDialog(
                             onDismissRequest = { showConfirmDialog.value = false },
                             confirmButton = {
                                 Button(onClick = {
+                                    val ticketToAdd = ticket()
+
+                                    ticketToAdd.assignedTo = formViewModel.state.value.assignedTo
+                                    ticketToAdd.equipmentID = formViewModel.state.value.equipmentID
+                                    ticketToAdd.remarks = formViewModel.state.value.remarks
+                                    ticketToAdd.location = formViewModel.state.value.location
+                                    ticketToAdd.issuedBy = app.currentUser?.id.toString()
+
+                                    formViewModel.addTicket(ticketToAdd)
+
                                     formViewModel.setEquipmentID("")
                                     formViewModel.setRemarks("")
                                     formViewModel.setLocation("")
@@ -225,7 +225,7 @@ fun FormScaffold(modifier: Modifier = Modifier, navController: NavHostController
                             title = { Text(text = "Confirmation")},
                             text = { Text(text = "Do you want to submit this ticket?")}
                         )
-                    }*/
+                    }
                 }
             }
         }

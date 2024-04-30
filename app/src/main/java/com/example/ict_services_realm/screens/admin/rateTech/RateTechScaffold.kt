@@ -14,6 +14,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -37,7 +38,7 @@ import com.example.ict_services_realm.models.user_remarks
 
 @Composable
 fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostController, rateTechViewModel: RateTechViewModel){
-    var showConfirmDialog = remember { mutableStateOf(false) }
+    val showConfirmDialog = remember { mutableStateOf(false) }
     val ctx = LocalContext.current
     LaunchedEffect(Unit) {
         rateTechViewModel.getTechName(rateTechViewModel.ticketInfoState.value!!.assignedTo)
@@ -133,34 +134,30 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                     .padding(12.dp)
                     .align(Alignment.End),
                 onClick = {
-                    val remark = user_remarks()
-                    remark.ticketID = rateTechViewModel.ticketInfoState.value?.ticketID
-                    remark.ratedBy = app.currentUser?.id
-                    remark.comment = rateTechViewModel.state.value.comment
-                    remark.rating = rateTechViewModel.state.value.rating
-
-                    when(val validationResult = rateTechViewModel.validateRemarkForm(remark)){
-                        is RateTechViewModel.FormValidationResult.Valid -> rateTechViewModel.addRating(
-                            userRemarks = remark,
-                            techID = rateTechViewModel.ticketInfoState.value!!.assignedTo,
-                        )
+                    val comment = rateTechViewModel.state.value.comment
+                    val rating = rateTechViewModel.state.value.rating
+                    when(val validationResult = rateTechViewModel.validateRemarkForm(rating, comment)){
+                        is RateTechViewModel.FormValidationResult.Valid -> showConfirmDialog.value = true
                         is RateTechViewModel.FormValidationResult.Invalid -> {
                             Toast.makeText(ctx, validationResult.errorMessage, Toast.LENGTH_SHORT).show()
                         }
                     }
-                    rateTechViewModel.setRating(0.0)
-                    rateTechViewModel.setComment("")
                     /* TODO: 1) IMPLEMENT NOTIFY*/
                 }
             )
             {
                 Text("Rate Performance")
             }
-            // WAG MUNA GALAWIN.
-/*            if(showConfirmDialog.value){
+
+            if(showConfirmDialog.value){
                 AlertDialog(onDismissRequest = { showConfirmDialog.value = false },
                     confirmButton = {
                         Button(onClick = {
+                            val remark = user_remarks()
+                            remark.ticketID = rateTechViewModel.ticketInfoState.value?.ticketID
+                            remark.ratedBy = app.currentUser?.id
+                            remark.comment = rateTechViewModel.state.value.comment
+                            remark.rating = rateTechViewModel.state.value.rating
                             rateTechViewModel.addRating(
                                 userRemarks = remark,
                                 techID = rateTechViewModel.ticketInfoState.value!!.assignedTo,
@@ -181,7 +178,7 @@ fun RateTechScaffold(modifier: Modifier = Modifier, navController: NavHostContro
                     title = { Text(text = "Confirmation")},
                     text = { Text(text = "Do you want to submit this review?")}
                 )
-            }*/
+            }
 
         }
     }
